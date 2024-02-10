@@ -1,0 +1,55 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_run:
+    workflows: ["Go Build and Test"]
+    types: ["completed"]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
+jobs:
+  deploy_cognito:
+    name: Cognito
+    uses: ./.github/workflows/terraform_apply.yml
+    with:
+      service: cognito
+      app_name: terraform-delight
+      app_env: production
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
+  deploy_lambda:
+    name: Lambda
+    uses: ./.github/workflows/terraform_apply.yml
+    with:
+      service: lambda
+      app_name: terraform-delight
+      app_env: production
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
+  deploy_api_gateway:
+    name: API Gateway
+    uses: ./.github/workflows/terraform_apply.yml
+    needs:
+      - deploy_cognito
+      - deploy_lambda
+    with:
+      service: api-gateway
+      app_name: terraform-delight
+      app_env: production
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}

@@ -1,0 +1,69 @@
+name: Terraform Destroy
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      app_name:
+        required: true
+        type: string
+      app_env:
+        required: true
+        type: string
+    secrets:
+      AWS_REGION:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_S3_BUCKET:
+        required: true
+
+env:
+  TF_VAR_app_env: production
+  TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+  TF_VAR_aws_s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Build Go Binary
+        if: ${{ inputs.service == 'lambda' }}
+        run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ./bin/test-lambda/main ./cmd/main.go
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        id: terraform_init
+        run: >
+          terraform -chdir=./terraform/${{ inputs.service }} init
+          -backend-config="bucket=${{ secrets.AWS_S3_BUCKET }}"
+          -backend-config="key=terraform/${{ inputs.app_name }}-${{ inputs.service }}-${{ inputs.app_env }}.tfstate"
+          -backend-config="region=${{ secrets.AWS_REGION }}"
+
+      - name: Terraform Plan Destroy
+        id: terraform_plan_destroy
+        run: terraform -chdir=./terraform/${{ inputs.service }} plan -destroy -input=false
+        continue-on-error: true
+
+      - name: Terraform Plan Destroy Status
+        id: terraform_plan_destroy_status
+        if: steps.terraform_plan_destroy.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Destroy
+        id: terraform_destroy
+        run: terraform -chdir=./terraform/${{ inputs.service }} destroy -auto-approve -input=false

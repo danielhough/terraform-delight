@@ -1,0 +1,31 @@
+name: Go Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+  TF_VAR_app_env: production
+  TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+  TF_VAR_aws_s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "^1.22"
+      - run: go version
+      - name: Build Go Binary
+        run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ./bin/test-lambda/main ./cmd/main.go
+      - name: Tests
+        run: go test -v ./...
