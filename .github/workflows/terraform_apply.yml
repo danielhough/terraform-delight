@@ -42,7 +42,7 @@ jobs:
 
       - name: Build Go Binary
         if: ${{ inputs.service == 'lambda' }}
-        run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ./bin/test-lambda/main ./cmd/main.go
+        run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ./bin/test-lambda/main ./cmd/test-lambda/main.go
 
       - uses: hashicorp/setup-terraform@v3
 
