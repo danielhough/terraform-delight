@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Terraform Delight
+
+Globals:
+  Function:
+    Timeout: 5
+    Tracing: Active
+  Api:
+    TracingEnabled: True
+
+Resources:
+  Test:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cmd/test-lambda
+      Handler: main
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        HttpGet:
+          Type: Api
+          Properties:
+            Path: "/test"
+            Method: GET
+            Auth:
+              Authorizer: NONE
