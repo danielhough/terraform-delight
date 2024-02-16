@@ -1,13 +1,11 @@
 variable "app_name" {
-  description = "The environment of the application"
+  description = "The name of the application"
   type        = string
-  default     = "terraform-delight"
 }
 
 variable "app_env" {
   description = "The environment of the application"
   type        = string
-  default     = "local"
 }
 
 variable "aws_region" {

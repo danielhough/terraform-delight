@@ -1,13 +1,11 @@
 variable "app_name" {
   description = "The name of the application"
   type        = string
-  default     = "terraform-delight"
 }
 
 variable "app_env" {
   description = "The environment of the application"
   type        = string
-  default     = "local"
 }
 
 variable "lambda_function_name" {
@@ -31,5 +29,4 @@ variable "lambda_handler" {
 variable "gateway_id" {
   description = "The ID of the API Gateway"
   type        = string
-  default     = "value"
 }

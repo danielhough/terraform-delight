@@ -86,6 +86,9 @@ go-get:
 go-mod-vendor:
 	make docker-run-go cmd='go mod vendor'
 
+go-mod-tidy:
+	make docker-run-go cmd='go mod tidy'
+
 sam-build:
 	sam build --debug
 
