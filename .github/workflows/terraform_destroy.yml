@@ -41,6 +41,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - uses: actions/setup-go@v5
+        if: ${{ inputs.service == 'lambda' }}
+        with:
+          go-version: "^1.22"
+
+      - run: go version
+        if: ${{ inputs.service == 'lambda' }}
+
       - name: Build Go Binary
         if: ${{ inputs.service == 'lambda' }}
         run: CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags "-s -w" -o ./bin/test-lambda/main ./cmd/test-lambda/main.go
