@@ -23,7 +23,8 @@ on:
         required: true
 
 env:
-  TF_VAR_app_env: production
+  TF_VAR_app_name: ${{ vars.APP_NAME }}
+  TF_VAR_app_env: ${{ vars.APP_ENV }}
   TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
   TF_VAR_aws_s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
 
