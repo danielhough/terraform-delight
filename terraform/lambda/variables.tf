@@ -25,8 +25,3 @@ variable "lambda_handler" {
   type        = string
   default     = "main"
 }
-
-variable "gateway_id" {
-  description = "The ID of the API Gateway"
-  type        = string
-}
